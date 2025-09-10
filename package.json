@@ -1,0 +1,78 @@
+{
+  "name": "react-solid-enterprise",
+  "version": "1.0.0",
+  "description": "Enterprise React TypeScript workspace with SOLID principles, clean architecture, and advanced tooling",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "lint:fix": "eslint . --fix",
+    "type-check": "tsc --noEmit",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "test:e2e": "playwright test",
+    "analyze": "cross-env ANALYZE=true next build",
+    "prepare": "husky",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "complexity": "cr --output reports/complexity --format json,html src/",
+    "complexity:custom": "node scripts/complexity-analysis.js",
+    "complexity:html": "node scripts/complexity-analysis.js && start reports/complexity/complexity-report.html",
+    "complexity:eslint": "eslint src/ --format json --output-file reports/complexity/eslint-report.json || true",
+    "audit": "npm audit",
+    "audit:fix": "npm audit fix",
+    "deps:check": "npm-check-updates",
+    "deps:update": "npm-check-updates -u",
+    "build:analyze": "npm run build && npm run analyze",
+    "clean": "rimraf .next dist node_modules node_modules/.cache"
+  },
+  "dependencies": {
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "next": "^15.5.2",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3.3.1",
+    "@next/bundle-analyzer": "^15.5.2",
+    "@playwright/test": "^1.55.0",
+    "@testing-library/jest-dom": "^6.8.0",
+    "@types/jest": "^29.5.0",
+    "@types/react": "^18.3.1",
+    "@typescript-eslint/eslint-plugin": "^8.43.0",
+    "@typescript-eslint/parser": "^8.43.0",
+    "autoprefixer": "^10.4.21",
+    "complexity-report": "^2.0.0-alpha",
+    "cross-env": "^10.0.0",
+    "eslint": "^9.35.0",
+    "eslint-config-next": "^15.5.2",
+    "husky": "^9.1.7",
+    "jest": "^30.1.3",
+    "jest-environment-jsdom": "^30.1.2",
+    "lint-staged": "^16.1.6",
+    "npm-check-updates": "^18.1.0",
+    "postcss": "^8.5.6",
+    "prettier": "^3.6.2",
+    "rimraf": "^6.0.1",
+    "tailwindcss": "^3.4.0",
+    "typescript": "^5.9.2"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md,css}": [
+      "prettier --write"
+    ]
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  }
+}
