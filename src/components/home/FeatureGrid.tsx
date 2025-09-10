@@ -9,7 +9,8 @@ interface FeatureCard {
 const featureCards: FeatureCard[] = [
   {
     title: '🏗️ SOLID Principles',
-    description: 'Complete implementation of all SOLID principles with practical examples:',
+    description:
+      'Complete implementation of all SOLID principles with practical examples:',
     items: [
       'Single Responsibility Principle',
       'Open/Closed Principle',
@@ -78,7 +79,7 @@ const featureCards: FeatureCard[] = [
 export function FeatureGrid(): JSX.Element {
   return (
     <div className='grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3'>
-      {featureCards.map((feature) => (
+      {featureCards.map(feature => (
         <Card key={feature.title}>
           <CardHeader>
             <CardTitle>{feature.title}</CardTitle>
@@ -86,7 +87,7 @@ export function FeatureGrid(): JSX.Element {
           <CardContent>
             <p className='text-gray-600'>{feature.description}</p>
             <ul className='mt-2 space-y-1 text-sm text-gray-500'>
-              {feature.items.map((item) => (
+              {feature.items.map(item => (
                 <li key={item}>• {item}</li>
               ))}
             </ul>

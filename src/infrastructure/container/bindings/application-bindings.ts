@@ -28,12 +28,16 @@ export function configureApplicationBindings(container: Container): void {
 function createUserApplicationService(
   container: Container
 ): UserApplicationService {
-  return new UserApplicationService(
-    container.get<UserRepository>(TYPES.UserRepository),
-    container.get<UserDomainService>(TYPES.UserDomainService),
-    container.get<DomainEventPublisher>(TYPES.DomainEventPublisher),
-    container.get<CommandBus>(TYPES.CommandBus),
-    container.get<QueryBus>(TYPES.QueryBus),
-    container.get<Logger>(TYPES.Logger)
-  );
+  return new UserApplicationService({
+    userRepository: container.get<UserRepository>(TYPES.UserRepository),
+    userDomainService: container.get<UserDomainService>(
+      TYPES.UserDomainService
+    ),
+    eventPublisher: container.get<DomainEventPublisher>(
+      TYPES.DomainEventPublisher
+    ),
+    commandBus: container.get<CommandBus>(TYPES.CommandBus),
+    queryBus: container.get<QueryBus>(TYPES.QueryBus),
+    logger: container.get<Logger>(TYPES.Logger),
+  });
 }

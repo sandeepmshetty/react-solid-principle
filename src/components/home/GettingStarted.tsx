@@ -27,17 +27,15 @@ const commandSections: CommandSection[] = [
 export function GettingStarted(): JSX.Element {
   return (
     <div className='rounded-lg bg-blue-50 p-6'>
-      <h2 className='mb-4 text-2xl font-bold text-blue-900'>
-        Getting Started
-      </h2>
+      <h2 className='mb-4 text-2xl font-bold text-blue-900'>Getting Started</h2>
       <div className='grid grid-cols-1 gap-6 md:grid-cols-2'>
-        {commandSections.map((section) => (
+        {commandSections.map(section => (
           <div key={section.title}>
             <h3 className='mb-2 font-semibold text-blue-800'>
               {section.title}
             </h3>
             <div className='rounded bg-blue-100 p-3 font-mono text-sm'>
-              {section.commands.map((cmd) => (
+              {section.commands.map(cmd => (
                 <div key={cmd.command}>
                   {cmd.command} # {cmd.description}
                 </div>

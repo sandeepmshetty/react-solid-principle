@@ -9,8 +9,7 @@ export function HeroSection(): JSX.Element {
       </div>
       <p className='mx-auto max-w-3xl text-xl text-gray-700 leading-relaxed'>
         A comprehensive demonstration of SOLID principles, clean architecture,
-        advanced code quality tools, and enterprise-grade development
-        standards.
+        advanced code quality tools, and enterprise-grade development standards.
       </p>
     </div>
   );
