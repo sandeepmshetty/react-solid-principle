@@ -94,65 +94,104 @@ export class GetUsersQueryHandler
   async handle(
     query: GetUsersQuery
   ): Promise<PaginatedResult<UserSummaryReadModel>> {
-    // This is a simplified implementation
-    // In a real scenario, you'd implement filtering and pagination in the repository
+    const users = await this.fetchUsers(query.filters);
+    const filteredUsers = this.applySearchFilter(users, query.filters?.search);
+    const totalCount = filteredUsers.length;
 
-    let users: UserEntity[] = [];
-
-    if (query.filters?.role) {
-      users = await this.userRepository.findByRole(query.filters.role);
-    } else if (query.filters?.isActive !== undefined) {
-      users = query.filters.isActive
-        ? await this.userRepository.findActive()
-        : await this.getAllInactiveUsers();
-    } else {
-      users = await this.userRepository.findActive();
-    }
-
-    // Apply search filter if provided
-    if (query.filters?.search) {
-      const searchTerm = query.filters.search.toLowerCase();
-      users = users.filter(
-        user =>
-          user.name.toLowerCase().includes(searchTerm) ||
-          user.email.toLowerCase().includes(searchTerm)
-      );
-    }
-
-    // Apply pagination
-    const totalCount = users.length;
-    const startIndex = (query.pagination.page - 1) * query.pagination.limit;
-    const endIndex = startIndex + query.pagination.limit;
-    const paginatedUsers = users.slice(startIndex, endIndex);
-
-    // Apply sorting
-    if (query.pagination.sortBy) {
-      paginatedUsers.sort((a, b) => {
-        const aValue = this.getValueForSorting(a, query.pagination.sortBy!);
-        const bValue = this.getValueForSorting(b, query.pagination.sortBy!);
-
-        if (query.pagination.sortDirection === 'desc') {
-          return bValue.localeCompare(aValue);
-        }
-        return aValue.localeCompare(bValue);
-      });
-    }
-
+    const paginatedUsers = this.applyPagination(
+      filteredUsers,
+      query.pagination
+    );
+    const sortedUsers = this.applySorting(paginatedUsers, query.pagination);
     const totalPages = Math.ceil(totalCount / query.pagination.limit);
 
-    return {
-      items: paginatedUsers.map(this.mapToSummaryReadModel),
+    return this.buildPaginatedResult(
+      sortedUsers,
+      query.pagination,
       totalCount,
-      page: query.pagination.page,
-      limit: query.pagination.limit,
-      totalPages,
-      hasNext: query.pagination.page < totalPages,
-      hasPrevious: query.pagination.page > 1,
-    };
+      totalPages
+    );
   }
 
   canHandle(query: Query): query is GetUsersQuery {
     return query instanceof GetUsersQuery;
+  }
+
+  private async fetchUsers(filters?: {
+    role?: string;
+    isActive?: boolean;
+    search?: string;
+  }): Promise<UserEntity[]> {
+    if (filters?.role) {
+      return await this.userRepository.findByRole(filters.role);
+    } else if (filters?.isActive !== undefined) {
+      return filters.isActive
+        ? await this.userRepository.findActive()
+        : await this.getAllInactiveUsers();
+    } else {
+      return await this.userRepository.findActive();
+    }
+  }
+
+  private applySearchFilter(
+    users: UserEntity[],
+    searchTerm?: string
+  ): UserEntity[] {
+    if (!searchTerm) {
+      return users;
+    }
+
+    const search = searchTerm.toLowerCase();
+    return users.filter(
+      user =>
+        user.name.toLowerCase().includes(search) ||
+        user.email.toLowerCase().includes(search)
+    );
+  }
+
+  private applyPagination(
+    users: UserEntity[],
+    pagination: PaginationQuery
+  ): UserEntity[] {
+    const startIndex = (pagination.page - 1) * pagination.limit;
+    const endIndex = startIndex + pagination.limit;
+    return users.slice(startIndex, endIndex);
+  }
+
+  private applySorting(
+    users: UserEntity[],
+    pagination: PaginationQuery
+  ): UserEntity[] {
+    if (!pagination.sortBy) {
+      return users;
+    }
+
+    return users.sort((a, b) => {
+      const aValue = this.getValueForSorting(a, pagination.sortBy!);
+      const bValue = this.getValueForSorting(b, pagination.sortBy!);
+
+      if (pagination.sortDirection === 'desc') {
+        return bValue.localeCompare(aValue);
+      }
+      return aValue.localeCompare(bValue);
+    });
+  }
+
+  private buildPaginatedResult(
+    users: UserEntity[],
+    pagination: PaginationQuery,
+    totalCount: number,
+    totalPages: number
+  ): PaginatedResult<UserSummaryReadModel> {
+    return {
+      items: users.map(this.mapToSummaryReadModel),
+      totalCount,
+      page: pagination.page,
+      limit: pagination.limit,
+      totalPages,
+      hasNext: pagination.page < totalPages,
+      hasPrevious: pagination.page > 1,
+    };
   }
 
   private async getAllInactiveUsers(): Promise<UserEntity[]> {

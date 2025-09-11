@@ -119,45 +119,21 @@ export class UpdateUserCommandHandler
     command: UpdateUserCommand
   ): Promise<Result<UserEntity, string>> {
     try {
-      // ✅ Load existing entity
-      const user = await this.userRepository.findById(command.userId);
+      const user = await this.loadUser(command.userId);
       if (!user) {
         return Result.failure('User not found');
       }
 
-      // ✅ Store previous values for event
-      const previousValues = {
-        name: user.name,
-        role: user.role,
-      };
+      const updateContext = this.captureUpdateContext(user);
+      this.applyUpdates(user, command.updates);
 
-      // ✅ Apply changes through domain methods
-      if (command.updates.name !== undefined) {
-        user.updateName(command.updates.name);
+      const validationResult = this.validateUser(user);
+      if (!validationResult.isValid) {
+        return Result.failure(validationResult.errors.join(', '));
       }
 
-      if (command.updates.role !== undefined) {
-        user.updateRole(command.updates.role);
-      }
-
-      // ✅ Domain validation
-      const validation = user.validate();
-      if (!validation.isValid) {
-        return Result.failure(validation.errors.join(', '));
-      }
-
-      // ✅ Persist
-      await this.userRepository.save(user);
-
-      // ✅ Publish domain event
-      const event = new UserUpdatedEvent(user.id, {
-        previousValues,
-        newValues: {
-          name: user.name,
-          role: user.role,
-        },
-      });
-      await this.eventPublisher.publish(event);
+      await this.persistUser(user);
+      await this.publishUpdateEvent(user, updateContext);
 
       return Result.success(user);
     } catch (error) {
@@ -165,6 +141,54 @@ export class UpdateUserCommandHandler
         error instanceof Error ? error.message : 'Unknown error'
       );
     }
+  }
+
+  private captureUpdateContext(user: UserEntity): UserUpdateContext {
+    return {
+      previousValues: {
+        name: user.name,
+        role: user.role,
+      },
+    };
+  }
+
+  private applyUpdates(
+    user: UserEntity,
+    updates: { name?: string; role?: string }
+  ): void {
+    if (updates.name !== undefined) {
+      user.updateName(updates.name);
+    }
+
+    if (updates.role !== undefined) {
+      user.updateRole(updates.role);
+    }
+  }
+
+  private validateUser(user: UserEntity): ValidationResult {
+    return user.validate();
+  }
+
+  private async persistUser(user: UserEntity): Promise<void> {
+    await this.userRepository.save(user);
+  }
+
+  private async publishUpdateEvent(
+    user: UserEntity,
+    context: UserUpdateContext
+  ): Promise<void> {
+    const event = new UserUpdatedEvent(user.id, {
+      previousValues: context.previousValues,
+      newValues: {
+        name: user.name,
+        role: user.role,
+      },
+    });
+    await this.eventPublisher.publish(event);
+  }
+
+  private async loadUser(userId: string): Promise<UserEntity | null> {
+    return await this.userRepository.findById(userId);
   }
 
   canHandle(command: Command): command is UpdateUserCommand {
@@ -226,4 +250,17 @@ export class DeactivateUserCommandHandler
   canHandle(command: Command): command is DeactivateUserCommand {
     return command instanceof DeactivateUserCommand;
   }
+}
+
+// ✅ Supporting interfaces for the refactored handlers
+interface UserUpdateContext {
+  previousValues: {
+    name: string;
+    role: string;
+  };
+}
+
+interface ValidationResult {
+  isValid: boolean;
+  errors: string[];
 }
