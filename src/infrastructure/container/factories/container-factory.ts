@@ -1,13 +1,13 @@
 // Container Factory Functions
 // Single Responsibility - Creates pre-configured containers for different environments
 
-import { configureApplicationBindings } from '../bindings/application-bindings';
-import { configureDomainBindings } from '../bindings/domain-bindings';
-import { configureEventBindings } from '../bindings/event-bindings';
-import { configureInfrastructureBindings } from '../bindings/infrastructure-bindings';
-import type { Container } from '../container-core';
-import { ModularContainer } from '../container-core';
-import type { ContainerConfiguration } from '../types';
+import { configureApplicationBindings } from '@/infrastructure/container/bindings/application-bindings';
+import { configureDomainBindings } from '@/infrastructure/container/bindings/domain-bindings';
+import { configureEventBindings } from '@/infrastructure/container/bindings/event-bindings';
+import { configureInfrastructureBindings } from '@/infrastructure/container/bindings/infrastructure-bindings';
+import type { Container } from '@/infrastructure/container/container-core';
+import { ModularContainer } from '@/infrastructure/container/container-core';
+import type { ContainerConfiguration } from '@/infrastructure/container/types';
 
 /**
  * Create a fully configured container

@@ -1,7 +1,6 @@
 // Application Layer Bindings
 // Single Responsibility - Only handles application service bindings
 
-import type { CommandBus, QueryBus } from '@/application/cqrs';
 import { UserApplicationService } from '@/application/services/user.application-service';
 import type { DomainEventPublisher } from '@/domain/user/events';
 import type {
@@ -36,8 +35,6 @@ function createUserApplicationService(
     eventPublisher: container.get<DomainEventPublisher>(
       TYPES.DomainEventPublisher
     ),
-    commandBus: container.get<CommandBus>(TYPES.CommandBus),
-    queryBus: container.get<QueryBus>(TYPES.QueryBus),
     logger: container.get<Logger>(TYPES.Logger),
   });
 }

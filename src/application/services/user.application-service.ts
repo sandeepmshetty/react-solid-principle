@@ -2,7 +2,7 @@
 // Single Responsibility Principle - Orchestrates use cases
 // Dependency Inversion Principle - Depends on abstractions
 
-import { CommandBus, QueryBus, Result } from '@/application/cqrs';
+import { Result } from '@/application/cqrs';
 import type { UserEntity } from '@/domain/user/entities';
 import type { DomainEventPublisher } from '@/domain/user/events';
 import type {
@@ -38,8 +38,6 @@ interface UserApplicationServiceDependencies {
   userRepository: UserRepository;
   userDomainService: UserDomainService;
   eventPublisher: DomainEventPublisher;
-  commandBus: CommandBus;
-  queryBus: QueryBus;
   logger: Logger;
 }
 
@@ -82,22 +80,11 @@ export class UserApplicationService {
       dependencies.userRepository
     );
 
-    // ✅ Register handlers with buses
-    this.registerHandlers();
-
     dependencies.logger.info('User Application Service initialized');
   }
 
   private get logger() {
     return this.dependencies.logger;
-  }
-
-  private get commandBus() {
-    return this.dependencies.commandBus;
-  }
-
-  private get queryBus() {
-    return this.dependencies.queryBus;
   }
 
   private get userRepository() {
@@ -113,7 +100,7 @@ export class UserApplicationService {
     this.logger.info('Creating user', { email, name, role });
 
     const command = new CreateUserCommand(email, name, role);
-    return await this.commandBus.execute<Result<UserEntity, string>>(command);
+    return await this.createUserHandler.handle(command);
   }
 
   async updateUser(
@@ -123,7 +110,7 @@ export class UserApplicationService {
     this.logger.info('Updating user', { userId, updates });
 
     const command = new UpdateUserCommand(userId, updates);
-    return await this.commandBus.execute<Result<UserEntity, string>>(command);
+    return await this.updateUserHandler.handle(command);
   }
 
   async deactivateUser(
@@ -133,7 +120,7 @@ export class UserApplicationService {
     this.logger.info('Deactivating user', { userId, reason });
 
     const command = new DeactivateUserCommand(userId, reason);
-    return await this.commandBus.execute<Result<void, string>>(command);
+    return await this.deactivateUserHandler.handle(command);
   }
 
   // ✅ Query operations
@@ -141,7 +128,7 @@ export class UserApplicationService {
     this.logger.debug('Getting user by ID', { userId });
 
     const query = new GetUserByIdQuery(userId);
-    return await this.queryBus.execute<UserReadModel | null>(query);
+    return await this.getUserByIdHandler.handle(query);
   }
 
   async getUsers(
@@ -155,9 +142,7 @@ export class UserApplicationService {
     this.logger.debug('Getting users', { pagination, filters });
 
     const query = new GetUsersQuery(pagination, filters);
-    return await this.queryBus.execute<PaginatedResult<UserSummaryReadModel>>(
-      query
-    );
+    return await this.getUsersHandler.handle(query);
   }
 
   async searchUsers(
@@ -167,7 +152,7 @@ export class UserApplicationService {
     this.logger.debug('Searching users', { searchTerm, limit });
 
     const query = new SearchUsersQuery(searchTerm, limit);
-    return await this.queryBus.execute<UserSummaryReadModel[]>(query);
+    return await this.searchUsersHandler.handle(query);
   }
 
   // ✅ Business operations
@@ -264,18 +249,5 @@ export class UserApplicationService {
 
     this.dependencies.logger.debug('User statistics calculated', stats);
     return stats;
-  }
-
-  // ✅ Register command and query handlers
-  private registerHandlers(): void {
-    // Register command handlers - using simplified bus registration
-    this.dependencies.commandBus.register(this.createUserHandler);
-    this.dependencies.commandBus.register(this.updateUserHandler);
-    this.dependencies.commandBus.register(this.deactivateUserHandler);
-
-    // Register query handlers
-    this.dependencies.queryBus.register(this.getUserByIdHandler);
-    this.dependencies.queryBus.register(this.getUsersHandler);
-    this.dependencies.queryBus.register(this.searchUsersHandler);
   }
 }
