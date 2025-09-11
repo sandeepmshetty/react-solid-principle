@@ -15,16 +15,33 @@ This workspace showcases advanced architectural patterns and development practic
 scalable, maintainable enterprise applications. It implements a complete **Clean Architecture** with
 **CQRS**, **Event Sourcing**, **Dependency Injection**, and comprehensive **code quality tooling**.
 
+### 🚦 Implementation Status
+
+| Feature                 | Status      | Description                                                  |
+| ----------------------- | ----------- | ------------------------------------------------------------ |
+| 🏗️ Clean Architecture   | ✅ Complete | Domain, Application, Infrastructure layers fully implemented |
+| ⚡ CQRS Pattern         | ✅ Complete | Command/Query buses with handlers and middleware             |
+| 🔄 Event Sourcing       | ✅ Complete | Domain events, event store, and event bus implemented        |
+| 💉 Dependency Injection | ✅ Complete | Advanced IoC container with lifecycle management             |
+| 🎯 SOLID Principles     | ✅ Complete | All principles demonstrated with practical examples          |
+| 🧪 Unit Testing         | ✅ Complete | Jest setup with comprehensive test utilities                 |
+| 🧪 Integration Testing  | ✅ Complete | Component and service integration tests                      |
+| 🧪 E2E Testing          | 🚧 Planned  | Playwright configured, tests to be implemented               |
+| 🐳 Docker Support       | 🚧 Planned  | Container configuration to be added                          |
+| 📊 Code Quality         | ✅ Complete | ESLint, Prettier, complexity analysis, bundle analysis       |
+
 ### 🌟 Key Features
 
 - **🏗️ Clean Architecture** - Domain, Application, Infrastructure layers
 - **⚡ CQRS Pattern** - Command Query Responsibility Segregation
 - **🔄 Event Sourcing** - Domain events and event bus implementation
-- **💉 Dependency Injection** - Modular IoC container system
+- **💉 Dependency Injection** - Advanced IoC container system with lifecycle management
 - **🎯 SOLID Principles** - Complete implementation with practical examples
-- **🧪 Comprehensive Testing** - Unit, Integration, and E2E testing strategies
-- **📊 Code Quality Tools** - Advanced analysis and reporting
-- **🚀 Modern Tooling** - TypeScript, ESLint, Prettier, Husky
+- **🧪 Testing Strategy** - Unit and Integration tests (E2E planned)
+- **📊 Code Quality Tools** - ESLint, Prettier, complexity analysis, bundle analysis
+- **🚀 Modern Tooling** - TypeScript 5.9, Next.js 15.5, React 18.3
+- **📈 Performance Monitoring** - Bundle analysis and complexity reporting
+- **🔒 Type Safety** - Strict TypeScript with comprehensive type definitions
 
 ## 📁 Project Structure
 
@@ -132,8 +149,8 @@ src/
 
 ```bash
 # Clone the repository
-git clone <repository-url>
-cd react-solid-enterprise
+git clone https://github.com/sandeepmshetty/react-solid-principle.git
+cd REACT-SOLID-STANDARD
 
 # Install dependencies
 npm install
@@ -154,7 +171,7 @@ npm run start            # Start production server
 npm run test             # Run unit tests
 npm run test:watch       # Run tests in watch mode
 npm run test:coverage    # Generate coverage report
-npm run test:e2e         # Run E2E tests with Playwright
+npm run test:e2e         # Run E2E tests (Playwright - setup required)
 
 # 🔍 Code Quality
 npm run lint             # Run ESLint
@@ -172,30 +189,61 @@ npm run audit            # Security audit
 
 ## 🧪 Testing Strategy
 
-### Unit Tests
+### Unit Tests ✅
 
 - **Domain Logic**: Test business rules in isolation
 - **Application Services**: Test use case orchestration
 - **Infrastructure**: Test external integrations
+- **Implementation**: Jest with Testing Library
 
-### Integration Tests
+### Integration Tests ✅
 
 - **Command/Query Handlers**: Test complete workflows
 - **Repository Implementations**: Test data access patterns
 - **Event Bus**: Test event publishing and handling
+- **CQRS Patterns**: Validate command/query separation
 
-### E2E Tests
+### E2E Tests 🚧
 
-- **User Workflows**: Test complete user journeys
-- **API Integration**: Test external service integration
-- **UI Components**: Test user interface interactions
+- **Status**: Framework installed, tests to be implemented
+- **Framework**: Playwright (configured for future use)
+- **Planned Coverage**:
+  - User workflows and business processes
+  - API integration testing
+  - UI component interactions
+  - Cross-browser compatibility
 
 ### Coverage Requirements
 
+- **Target Coverage**: 80% across all metrics
 - **Branches**: 80%
 - **Functions**: 80%
 - **Lines**: 80%
 - **Statements**: 80%
+
+### Testing Architecture
+
+The testing strategy follows the same layered architecture as the application:
+
+- **Unit Tests**: Focus on individual components and pure functions
+- **Integration Tests**: Validate layer interactions and contracts
+- **E2E Tests**: Verify complete user scenarios (planned)
+
+### Current Test Implementation
+
+```bash
+# Run existing tests
+npm run test                 # Run all unit and integration tests
+npm run test:watch          # Run tests in watch mode
+npm run test:coverage       # Generate coverage report
+
+# Planned E2E testing (setup required)
+npm run test:e2e            # Playwright E2E tests (requires test implementation)
+```
+
+**Note**: The project currently includes comprehensive unit tests for core services. Additional test
+coverage for domain logic, application services, and UI components is recommended before production
+deployment.
 
 ## 📊 Code Quality & Analysis
 
@@ -308,29 +356,57 @@ npm run build:analyze
 ### Production Build
 
 ```bash
+# Build the application
 npm run build
+
+# Start production server
 npm run start
 ```
 
-### Environment Variables
+### Deployment Checklist
+
+- [ ] Run type checking: `npm run type-check`
+- [ ] Run linting: `npm run lint`
+- [ ] Run tests: `npm run test`
+- [ ] Generate production build: `npm run build`
+- [ ] Verify build analysis: `npm run analyze`
+
+### Environment Configuration
+
+The application uses Next.js built-in environment variable support and dependency injection for
+configuration.
+
+Create `.env.local` for local development:
 
 ```env
-NODE_ENV=production
-NEXT_PUBLIC_API_URL=https://api.example.com
+# Development configuration
+NODE_ENV=development
+NEXT_PUBLIC_API_URL=http://localhost:3001
+
+# Production configuration
+# NODE_ENV=production
+# NEXT_PUBLIC_API_URL=https://api.example.com
 ```
 
-### Docker Support
+**Note**: Configuration is managed through the IoC container system in
+`src/infrastructure/container/`.
 
-```dockerfile
-FROM node:18-alpine
-WORKDIR /app
-COPY package*.json ./
-RUN npm ci --only=production
-COPY . .
-RUN npm run build
-EXPOSE 3000
-CMD ["npm", "start"]
-```
+### Docker Support 🚧
+
+**Status**: Planned for future implementation
+
+Docker configuration will include:
+
+- Multi-stage builds for optimization
+- Development and production environments
+- Container orchestration support
+
+### Deployment Targets
+
+- **Vercel**: Recommended for Next.js applications
+- **Netlify**: Static deployment with serverless functions
+- **AWS**: Container deployment with ECS/EKS
+- **Traditional VPS**: Node.js deployment with PM2
 
 ## 📚 Learning Resources
 
@@ -360,11 +436,20 @@ CMD ["npm", "start"]
 
 ### Development Guidelines
 
-- Follow SOLID principles
-- Write comprehensive tests
-- Maintain high code coverage
-- Use conventional commit messages
-- Update documentation
+- **Architecture**: Follow Clean Architecture and SOLID principles
+- **Testing**: Write unit and integration tests for new features
+- **Code Quality**: Ensure ESLint and TypeScript checks pass
+- **Commits**: Use conventional commit messages
+- **Documentation**: Update README and code comments
+- **Coverage**: Aim for 80% test coverage on new code
+- **Performance**: Use bundle analyzer for large changes
+
+### Code Standards
+
+- **TypeScript**: Strict mode enabled with comprehensive type safety
+- **ESLint**: Custom rules for complexity, file size, and SOLID principles
+- **Prettier**: Consistent code formatting across the project
+- **Husky**: Pre-commit hooks ensure quality gates
 
 ## 📄 License
 
@@ -376,6 +461,54 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - **Domain-Driven Design** by Eric Evans
 - **Enterprise Integration Patterns** by Gregor Hohpe
 - **React** and **TypeScript** communities
+
+---
+
+## 🛠️ Troubleshooting
+
+### Common Issues
+
+**Build Errors:**
+
+```bash
+# Clear Next.js cache and rebuild
+npm run clean
+npm install
+npm run build
+```
+
+**Type Errors:**
+
+```bash
+# Run type checking to identify issues
+npm run type-check
+```
+
+**Test Setup:**
+
+```bash
+# Ensure all dependencies are installed
+npm install
+npm run test
+```
+
+**E2E Testing Setup (Future):**
+
+```bash
+# When E2E tests are implemented
+npx playwright install
+npm run test:e2e
+```
+
+### Performance Monitoring
+
+```bash
+# Analyze bundle size
+npm run analyze
+
+# Generate complexity report
+npm run complexity:html
+```
 
 ---
 
