@@ -146,6 +146,11 @@ logs
 coverage/
 .nyc_output/
 
+# Playwright
+test-results/
+playwright-report/
+playwright/.cache/
+
 # Analysis and Reports (generated files)
 reports/
 *.report.json
