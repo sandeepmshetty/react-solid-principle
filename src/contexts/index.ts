@@ -106,35 +106,7 @@ export function useTheme(): Theme {
   return useContext(ThemeContext);
 }
 
-// ✅ SRP: Authentication context only manages auth state
-export interface AuthUser {
-  id: string;
-  email: string;
-  name: string;
-  role: string;
-}
-
-export interface AuthState {
-  user: AuthUser | null;
-  isAuthenticated: boolean;
-  isLoading: boolean;
-}
-
-export interface AuthContextValue extends AuthState {
-  login: (email: string, password: string) => Promise<void>;
-  logout: () => Promise<void>;
-  refreshAuth: () => Promise<void>;
-}
-
-export const AuthContext = createContext<AuthContextValue | null>(null);
-
-export function useAuth(): AuthContextValue {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
-}
+// NOTE: AuthContext and useAuth have been removed as authentication is out of scope for this repository demo.
 
 // ✅ SRP: Notification context only manages notifications
 export interface Notification {

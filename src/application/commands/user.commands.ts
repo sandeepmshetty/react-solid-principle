@@ -3,11 +3,13 @@
 // Command Pattern - Encapsulates requests as objects
 
 import { Command, CommandHandler, Result } from '@/application/cqrs';
-import { UserEntity } from '@/domain/user/entities';
+import { UserEntity, type UserRole } from '@/domain/user/entities';
 import type { DomainEventPublisher } from '@/domain/user/events';
 import {
+  UserActivatedEvent,
   UserCreatedEvent,
   UserDeactivatedEvent,
+  UserRoleChangedEvent,
   UserUpdatedEvent,
 } from '@/domain/user/events';
 import type {
@@ -23,7 +25,7 @@ export class CreateUserCommand implements Command {
   constructor(
     public readonly email: string,
     public readonly name: string,
-    public readonly role: string = 'user'
+    public readonly role: UserRole = 'user'
   ) {
     this.commandId = `create-user-${Date.now()}`;
     this.timestamp = new Date();
@@ -99,7 +101,7 @@ export class UpdateUserCommand implements Command {
     public readonly userId: string,
     public readonly updates: {
       name?: string;
-      role?: string;
+      role?: UserRole;
     }
   ) {
     this.commandId = `update-user-${Date.now()}`;
@@ -154,7 +156,7 @@ export class UpdateUserCommandHandler
 
   private applyUpdates(
     user: UserEntity,
-    updates: { name?: string; role?: string }
+    updates: { name?: string; role?: UserRole }
   ): void {
     if (updates.name !== undefined) {
       user.updateName(updates.name);
@@ -252,11 +254,124 @@ export class DeactivateUserCommandHandler
   }
 }
 
+// ✅ Activate User Command
+export class ActivateUserCommand implements Command {
+  public readonly commandId: string;
+  public readonly timestamp: Date;
+
+  constructor(public readonly userId: string) {
+    this.commandId = `activate-user-${Date.now()}`;
+    this.timestamp = new Date();
+  }
+}
+
+export class ActivateUserCommandHandler
+  implements CommandHandler<ActivateUserCommand, Result<UserEntity, string>>
+{
+  constructor(
+    private readonly userRepository: UserRepository,
+    private readonly eventPublisher: DomainEventPublisher
+  ) {}
+
+  async handle(
+    command: ActivateUserCommand
+  ): Promise<Result<UserEntity, string>> {
+    try {
+      const user = await this.userRepository.findById(command.userId);
+      if (!user) {
+        return Result.failure('User not found');
+      }
+
+      if (user.isActive) {
+        return Result.failure('User is already active');
+      }
+
+      // ✅ Domain operation
+      user.activate();
+
+      // ✅ Persist
+      await this.userRepository.save(user);
+
+      // ✅ Publish domain event
+      const event = new UserActivatedEvent(user.id);
+      await this.eventPublisher.publish(event);
+
+      return Result.success(user);
+    } catch (error) {
+      return Result.failure(
+        error instanceof Error ? error.message : 'Unknown error'
+      );
+    }
+  }
+
+  canHandle(command: Command): command is ActivateUserCommand {
+    return command instanceof ActivateUserCommand;
+  }
+}
+
+// ✅ Change User Role Command
+export class ChangeUserRoleCommand implements Command {
+  public readonly commandId: string;
+  public readonly timestamp: Date;
+
+  constructor(
+    public readonly userId: string,
+    public readonly newRole: UserRole
+  ) {
+    this.commandId = `change-user-role-${Date.now()}`;
+    this.timestamp = new Date();
+  }
+}
+
+export class ChangeUserRoleCommandHandler
+  implements CommandHandler<ChangeUserRoleCommand, Result<UserEntity, string>>
+{
+  constructor(
+    private readonly userRepository: UserRepository,
+    private readonly eventPublisher: DomainEventPublisher
+  ) {}
+
+  async handle(
+    command: ChangeUserRoleCommand
+  ): Promise<Result<UserEntity, string>> {
+    try {
+      const user = await this.userRepository.findById(command.userId);
+      if (!user) {
+        return Result.failure('User not found');
+      }
+
+      const previousRole = user.role;
+      user.updateRole(command.newRole);
+
+      // ✅ Persist
+      await this.userRepository.save(user);
+
+      // ✅ Publish domain event
+      const event = new UserRoleChangedEvent(
+        user.id,
+        previousRole,
+        command.newRole
+      );
+      await this.eventPublisher.publish(event);
+
+      return Result.success(user);
+    } catch (error) {
+      return Result.failure(
+        error instanceof Error ? error.message : 'Unknown error'
+      );
+    }
+  }
+
+  canHandle(command: Command): command is ChangeUserRoleCommand {
+    return command instanceof ChangeUserRoleCommand;
+  }
+}
+
 // ✅ Supporting interfaces for the refactored handlers
 interface UserUpdateContext {
   previousValues: {
     name: string;
-    role: string;
+    role: UserRole;
   };
 }
 

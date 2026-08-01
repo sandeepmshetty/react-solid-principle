@@ -1,5 +1,6 @@
 import type { UserSummaryReadModel } from '@/application/queries/user.queries';
 import type { UserApplicationService } from '@/application/services/user.application-service';
+import type { UserRole } from '@/domain/user/entities';
 import { createDevelopmentContainer, TYPES } from '@/infrastructure/container';
 import React, { useCallback, useState } from 'react';
 
@@ -9,7 +10,7 @@ export interface UseUserManagementReturn {
   error: string | null;
   isCreating: boolean;
   loadUsers: () => Promise<void>;
-  createUser: (email: string, name: string, role: string) => Promise<boolean>;
+  createUser: (email: string, name: string, role: UserRole) => Promise<boolean>;
   deactivateUser: (userId: string) => Promise<boolean>;
   clearError: () => void;
 }
@@ -50,7 +51,7 @@ export function useUserManagement(): UseUserManagementReturn {
   }, [userService]);
 
   const createUser = useCallback(
-    async (email: string, name: string, role: string): Promise<boolean> => {
+    async (email: string, name: string, role: UserRole): Promise<boolean> => {
       try {
         setIsCreating(true);
         setError(null);

@@ -53,8 +53,5 @@ function createUserDomainService(): UserDomainService {
     validateUniqueEmail: async () => true,
     generateUserId: () =>
       `user-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-    hashPassword: async (password: string) => `hashed-${password}`,
-    verifyPassword: async (password: string, hash: string) =>
-      hash === `hashed-${password}`,
   };
 }

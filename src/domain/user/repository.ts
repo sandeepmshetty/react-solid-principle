@@ -2,13 +2,13 @@
 // Interface Segregation Principle - Specific, focused interfaces
 // Dependency Inversion Principle - Domain defines contracts, infrastructure implements
 
-import type { UserEntity } from './entities';
+import type { UserEntity, UserRole } from './entities';
 
 // ✅ ISP: Separate read and write operations
 export interface UserReader {
   findById(id: string): Promise<UserEntity | null>;
   findByEmail(email: string): Promise<UserEntity | null>;
-  findByRole(role: string): Promise<UserEntity[]>;
+  findByRole(role: UserRole): Promise<UserEntity[]>;
   findActive(): Promise<UserEntity[]>;
   count(): Promise<number>;
 }
@@ -22,10 +22,17 @@ export interface UserWriter {
 // ✅ Combined interface for convenience
 export interface UserRepository extends UserReader, UserWriter {}
 
-// ✅ Domain services interfaces
+// ✅ ISP: UserDomainService only contains user-domain concerns
+//    Password hashing is an auth concern — extracted to PasswordService below.
 export interface UserDomainService {
   validateUniqueEmail(email: string, excludeId?: string): Promise<boolean>;
   generateUserId(): string;
+}
+
+// ✅ ISP: PasswordService is auth scaffolding — kept as a separate interface to show
+//    where it would plug in when auth is added, without polluting UserDomainService.
+//    NOTE: Not implemented in this demo; no Provider or binding wires this up.
+export interface PasswordService {
   hashPassword(password: string): Promise<string>;
   verifyPassword(password: string, hash: string): Promise<boolean>;
 }
@@ -57,7 +64,7 @@ export class ActiveUserSpecification implements UserSpecification {
 }
 
 export class UserRoleSpecification implements UserSpecification {
-  constructor(private readonly role: string) {}
+  constructor(private readonly role: UserRole) {}
 
   isSatisfiedBy(user: UserEntity): boolean {
     return user.role === this.role;

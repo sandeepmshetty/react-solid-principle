@@ -1,12 +1,39 @@
 // Domain Entities following Domain-Driven Design
-// Single Responsibility Principle - Each entity represents one business concept
+// Single Responsibility Principle - Each type/class represents one concept
 // Dependency Inversion Principle - Domain doesn't depend on infrastructure
+
+// ✅ UserRole — typed union prevents invalid roles at compile time (ISP + type-safety)
+export type UserRole = 'admin' | 'user' | 'moderator';
+
+// ✅ EmailAddress value object — validation enforced at construction time (SRP)
+//    Invalid email states are unrepresentable; the weak validate() check is no longer needed.
+export class EmailAddress {
+  private constructor(public readonly value: string) {}
+
+  static create(raw: string): EmailAddress {
+    const normalised = raw.trim().toLowerCase();
+    // RFC-minimal check: must contain exactly one @, with chars on both sides
+    const atIndex = normalised.indexOf('@');
+    if (atIndex < 1 || atIndex === normalised.length - 1) {
+      throw new DomainError(`Invalid email address: "${raw}"`);
+    }
+    return new EmailAddress(normalised);
+  }
+
+  equals(other: EmailAddress): boolean {
+    return this.value === other.value;
+  }
+
+  toString(): string {
+    return this.value;
+  }
+}
 
 interface UserEntityData {
   readonly id: string;
-  readonly email: string;
+  readonly email: string; // stored as normalised string after EmailAddress validation
   name: string;
-  role: string;
+  role: UserRole;
   readonly createdAt: Date;
   updatedAt: Date;
   isActive: boolean;
@@ -15,22 +42,23 @@ interface UserEntityData {
 export class UserEntity {
   private constructor(private readonly data: UserEntityData) {}
 
-  // ✅ Factory method following the Builder pattern
+  // ✅ Factory method — EmailAddress validates the email before storage
   static create(input: {
     id: string;
     email: string;
     name: string;
-    role: string;
+    role?: UserRole;
     createdAt?: Date;
     updatedAt?: Date;
     isActive?: boolean;
   }): UserEntity {
+    const emailAddress = EmailAddress.create(input.email); // throws DomainError if invalid
     const now = new Date();
     return new UserEntity({
       id: input.id,
-      email: input.email,
+      email: emailAddress.value, // normalised lowercase value
       name: input.name,
-      role: input.role,
+      role: input.role ?? 'user',
       createdAt: input.createdAt ?? now,
       updatedAt: input.updatedAt ?? now,
       isActive: input.isActive ?? true,
@@ -50,7 +78,7 @@ export class UserEntity {
     return this.data.name;
   }
 
-  get role(): string {
+  get role(): UserRole {
     return this.data.role;
   }
 
@@ -75,11 +103,7 @@ export class UserEntity {
     this.data.updatedAt = new Date();
   }
 
-  updateRole(newRole: string): void {
-    const validRoles = ['admin', 'user', 'moderator'];
-    if (!validRoles.includes(newRole)) {
-      throw new DomainError(`Invalid role: ${newRole}`);
-    }
+  updateRole(newRole: UserRole): void {
     this.data.role = newRole;
     this.data.updatedAt = new Date();
   }
@@ -94,13 +118,9 @@ export class UserEntity {
     this.data.updatedAt = new Date();
   }
 
-  // ✅ Domain validation
+  // ✅ Domain validation — email is always valid (enforced by EmailAddress VO at construction)
   validate(): DomainValidationResult {
     const errors: string[] = [];
-
-    if (!this.data.email.includes('@')) {
-      errors.push('Invalid email format');
-    }
 
     if (this.data.name.length < 2) {
       errors.push('Name must be at least 2 characters');
@@ -126,24 +146,6 @@ export class UserEntity {
   }
 }
 
-// ✅ Value objects
-export class UserProfile {
-  constructor(
-    public readonly firstName: string,
-    public readonly lastName: string,
-    public readonly avatar?: string,
-    public readonly bio?: string
-  ) {
-    if (!firstName.trim() || !lastName.trim()) {
-      throw new DomainError('First name and last name are required');
-    }
-  }
-
-  get fullName(): string {
-    return `${this.firstName} ${this.lastName}`;
-  }
-}
-
 // ✅ Domain errors
 export class DomainError extends Error {
   constructor(
@@ -165,7 +167,7 @@ export interface UserPlainObject {
   id: string;
   email: string;
   name: string;
-  role: string;
+  role: UserRole;
   createdAt: Date;
   updatedAt: Date;
   isActive: boolean;

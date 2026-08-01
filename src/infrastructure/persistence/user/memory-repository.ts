@@ -1,7 +1,7 @@
 // In-Memory User Repository for Testing
 // Single Responsibility Principle - Only handles in-memory user persistence for testing
 
-import { UserEntity } from '@/domain/user/entities';
+import { UserEntity, type UserRole } from '@/domain/user/entities';
 import type { UserRepository } from '@/domain/user/repository';
 
 export class InMemoryUserRepository implements UserRepository {
@@ -20,7 +20,7 @@ export class InMemoryUserRepository implements UserRepository {
     return null;
   }
 
-  async findByRole(role: string): Promise<UserEntity[]> {
+  async findByRole(role: UserRole): Promise<UserEntity[]> {
     return Array.from(this.users.values()).filter(user => user.role === role);
   }
 

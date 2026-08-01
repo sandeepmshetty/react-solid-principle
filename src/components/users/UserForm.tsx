@@ -1,10 +1,11 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui';
+import type { UserRole } from '@/domain/user/entities';
 import React, { useState } from 'react';
 
 interface UserFormData {
   email: string;
   name: string;
-  role: string;
+  role: UserRole;
 }
 
 interface UserFormProps {
@@ -37,7 +38,7 @@ export function UserForm({ isCreating, onSubmit }: UserFormProps): JSX.Element {
   const updateField =
     (field: keyof UserFormData) =>
     (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-      setFormData(prev => ({ ...prev, [field]: e.target.value }));
+      setFormData(prev => ({ ...prev, [field]: e.target.value as UserRole }));
     };
 
   return (

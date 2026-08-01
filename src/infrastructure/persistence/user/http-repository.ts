@@ -2,7 +2,7 @@
 // Single Responsibility Principle - Only handles HTTP-based user persistence
 // Dependency Inversion Principle - Implements domain interfaces
 
-import { UserEntity } from '@/domain/user/entities';
+import { UserEntity, type UserRole } from '@/domain/user/entities';
 import type { UserRepository } from '@/domain/user/repository';
 import type { HttpClient } from '@/infrastructure/http/interfaces';
 import type { Logger } from '@/infrastructure/logging/interfaces';
@@ -62,7 +62,7 @@ export class HttpUserRepository implements UserRepository {
     }
   }
 
-  async findByRole(role: string): Promise<UserEntity[]> {
+  async findByRole(role: UserRole): Promise<UserEntity[]> {
     try {
       this.logger.info(`Finding users by role: ${role}`);
 

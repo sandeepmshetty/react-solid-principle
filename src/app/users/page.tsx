@@ -1,20 +1,12 @@
 'use client';
 
-import { ErrorDisplay } from '@/components/ui';
-import { ArchitectureInfo } from '@/components/users/ArchitectureInfo';
 import { SOLIDPrinciplesDemo } from '@/components/users/SOLIDPrinciplesDemo';
 import { UserForm } from '@/components/users/UserForm';
 import { UserList } from '@/components/users/UserList';
+import type { UserRole } from '@/domain/user/entities';
 import { useUserManagement } from '@/hooks/useUserManagement';
 import { useEffect } from 'react';
 
-// Opt out of static generation for this page
-export const dynamic = 'force-dynamic';
-
-/**
- * Users page component - now follows Single Responsibility Principle
- * Responsibility: Orchestrate user management UI components
- */
 export default function UsersPage(): JSX.Element {
   const {
     users,
@@ -35,7 +27,7 @@ export default function UsersPage(): JSX.Element {
   const handleCreateUser = async (data: {
     email: string;
     name: string;
-    role: string;
+    role: UserRole;
   }) => {
     return await createUser(data.email, data.name, data.role);
   };
@@ -52,9 +44,19 @@ export default function UsersPage(): JSX.Element {
         </p>
       </div>
 
-      <ArchitectureInfo />
-
-      <ErrorDisplay error={error} onDismiss={clearError} />
+      {error && (
+        <div className='rounded-md bg-red-50 p-4 border border-red-200'>
+          <div className='flex items-center justify-between'>
+            <div className='text-sm text-red-700'>{error}</div>
+            <button
+              onClick={clearError}
+              className='text-sm text-red-500 hover:text-red-700'
+            >
+              Dismiss
+            </button>
+          </div>
+        </div>
+      )}
 
       <UserForm isCreating={isCreating} onSubmit={handleCreateUser} />
 

@@ -8,7 +8,7 @@ import type {
   Query,
   QueryHandler,
 } from '@/application/cqrs';
-import type { UserEntity } from '@/domain/user/entities';
+import type { UserEntity, UserRole } from '@/domain/user/entities';
 import type { UserRepository } from '@/domain/user/repository';
 
 // ✅ DTOs for queries (separate from domain entities)
@@ -16,7 +16,7 @@ export interface UserReadModel {
   id: string;
   email: string;
   name: string;
-  role: string;
+  role: UserRole;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
@@ -26,7 +26,7 @@ export interface UserSummaryReadModel {
   id: string;
   name: string;
   email: string;
-  role: string;
+  role: UserRole;
   isActive: boolean;
 }
 
@@ -76,7 +76,7 @@ export class GetUsersQuery implements Query {
   constructor(
     public readonly pagination: PaginationQuery,
     public readonly filters?: {
-      role?: string;
+      role?: UserRole;
       isActive?: boolean;
       search?: string;
     }
@@ -118,7 +118,7 @@ export class GetUsersQueryHandler
   }
 
   private async fetchUsers(filters?: {
-    role?: string;
+    role?: UserRole;
     isActive?: boolean;
     search?: string;
   }): Promise<UserEntity[]> {
@@ -195,8 +195,7 @@ export class GetUsersQueryHandler
   }
 
   private async getAllInactiveUsers(): Promise<UserEntity[]> {
-    // This would be implemented in the repository
-    // For now, return empty array as we don't have inactive users method
+    // Return empty array as we don't have inactive users method on repository
     return [];
   }
 
@@ -246,8 +245,6 @@ export class SearchUsersQueryHandler
   constructor(private readonly userRepository: UserRepository) {}
 
   async handle(query: SearchUsersQuery): Promise<UserSummaryReadModel[]> {
-    // Simple search implementation
-    // In a real scenario, you might use a dedicated search service
     const activeUsers = await this.userRepository.findActive();
     const searchTerm = query.searchTerm.toLowerCase();
 

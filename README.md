@@ -17,18 +17,18 @@ scalable, maintainable enterprise applications. It implements a complete **Clean
 
 ### 🚦 Implementation Status
 
-| Feature                 | Status      | Description                                                  |
-| ----------------------- | ----------- | ------------------------------------------------------------ |
-| 🏗️ Clean Architecture   | ✅ Complete | Domain, Application, Infrastructure layers fully implemented |
-| ⚡ CQRS Pattern         | ✅ Complete | Command/Query buses with handlers and middleware             |
-| 🔄 Event Sourcing       | ✅ Complete | Domain events, event store, and event bus implemented        |
-| 💉 Dependency Injection | ✅ Complete | Advanced IoC container with lifecycle management             |
-| 🎯 SOLID Principles     | ✅ Complete | All principles demonstrated with practical examples          |
-| 🧪 Unit Testing         | ✅ Complete | Jest setup with comprehensive test utilities                 |
-| 🧪 Integration Testing  | ✅ Complete | Component and service integration tests                      |
-| 🧪 E2E Testing          | 🚧 Planned  | Playwright configured, tests to be implemented               |
-| 🐳 Docker Support       | 🚧 Planned  | Container configuration to be added                          |
-| 📊 Code Quality         | ✅ Complete | ESLint, Prettier, complexity analysis, bundle analysis       |
+| Feature                 | Status      | Description                                                         |
+| ----------------------- | ----------- | ------------------------------------------------------------------- |
+| 🏗️ Clean Architecture   | ✅ Complete | Domain, Application, Infrastructure layers fully implemented        |
+| ⚡ CQRS Pattern         | ✅ Complete | Command/Query buses with handlers and middleware                    |
+| 🔄 Event Sourcing       | ✅ Complete | Domain events, event store, and event bus implemented               |
+| 💉 Dependency Injection | ✅ Complete | Advanced IoC container with lifecycle management                    |
+| 🎯 SOLID Principles     | ✅ Complete | All principles demonstrated with practical examples                 |
+| 🧪 Unit Testing         | ✅ Complete | Jest setup with comprehensive test utilities                        |
+| 🧪 Integration Testing  | ✅ Complete | Component and service integration tests                             |
+| 🧪 E2E Testing          | ✅ Complete | Playwright — 68 tests across Home, Users, Architecture & Navigation |
+
+| 📊 Code Quality | ✅ Complete | ESLint, Prettier, complexity analysis, bundle analysis |
 
 ### 🌟 Key Features
 
@@ -52,7 +52,6 @@ src/
 │   │   ├── entities.ts     # Domain entities and value objects
 │   │   ├── events.ts       # Domain events
 │   │   └── repository.ts   # Repository interfaces
-│   └── auth/               # Authentication domain
 ├── 🎯 application/          # Application Business Rules
 │   ├── commands/           # Write operations (CQRS)
 │   ├── queries/            # Read operations (CQRS)
@@ -107,27 +106,28 @@ src/
 
 #### ✅ Single Responsibility Principle (SRP)
 
-- [`UserEntity`](src/domain/user/entities.ts:5) - Only manages user business logic
-- [`UserRepository`](src/domain/user/repository.ts) - Only handles user data persistence
-- [`CreateUserCommand`](src/application/commands/user.commands.ts) - Only represents user creation
+- [UserEntity](src/domain/user/entities.ts#L31) - Only manages user business logic
+- [UserRepository](src/domain/user/repository.ts#L23) - Only handles user data persistence
+- [CreateUserCommand](src/application/commands/user.commands.ts#L19) - Only represents user creation
   intent
 
 #### ✅ Open/Closed Principle (OCP)
 
-- [`CommandHandler`](src/application/cqrs.ts:16) - New handlers can be added without modifying
+- [CommandHandler](src/application/cqrs.ts#L16) - New handlers can be added without modifying
   existing code
-- [`Repository`](src/infrastructure/persistence/) - New storage backends without changing interfaces
-- [`EventBus`](src/infrastructure/events/event-bus.ts) - Extensible through event registration
+- [Repository](src/infrastructure/persistence/user/) - New storage backends without changing
+  interfaces
+- [EventBus](src/infrastructure/events/event-bus.ts#L12) - Extensible through event registration
 
 #### ✅ Liskov Substitution Principle (LSP)
 
-- [`UserRepository`](src/infrastructure/persistence/user/) implementations are interchangeable
-- [`Logger`](src/services/logger.ts) implementations work identically
-- [`HttpClient`](src/services/http-client/) implementations follow same contract
+- [UserRepository](src/infrastructure/persistence/user/) implementations are interchangeable
+- [Logger](src/services/logger.ts#L7) implementations work identically
+- [HttpClient](src/infrastructure/http/) implementations follow same contract
 
 #### ✅ Interface Segregation Principle (ISP)
 
-- [`CommandBus`](src/application/cqrs.ts:27) vs [`QueryBus`](src/application/cqrs.ts:34) - Separate
+- [CommandBus](src/application/cqrs.ts#L27) vs [QueryBus](src/application/cqrs.ts#L34) - Separate
   read and write operations
 - Specific event handlers handle only relevant event types
 - Focused command interfaces for single-purpose operations
@@ -203,15 +203,15 @@ npm run audit            # Security audit
 - **Event Bus**: Test event publishing and handling
 - **CQRS Patterns**: Validate command/query separation
 
-### E2E Tests 🚧
+### E2E Tests ✅
 
-- **Status**: Framework installed, tests to be implemented
-- **Framework**: Playwright (configured for future use)
-- **Planned Coverage**:
-  - User workflows and business processes
-  - API integration testing
-  - UI component interactions
-  - Cross-browser compatibility
+- **Status**: 68 tests implemented and passing
+- **Framework**: Playwright (Chromium)
+- **Coverage**:
+  - Home / Dashboard page (layout, hero, feature grid, navigation)
+  - Users page (form validation, CRUD, role badges, deactivation flow)
+  - Architecture page (all content sections, SOLID references)
+  - Navigation & routing (full cycle, back/forward, 404, accessibility, keyboard)
 
 ### Coverage Requirements
 
@@ -347,9 +347,11 @@ npm run build:analyze
 
 ### Authorization
 
-- **Command Level**: Permission checks before execution
-- **Query Level**: Data filtering based on user context
-- **Event Level**: Event publication permissions
+> **Out of scope for this demonstration.** Auth interfaces (`AuthService`, `AuthContext`,
+> `AuthCredentials`) exist as type stubs in `src/types/` and `src/contexts/` to show how
+> authentication _would_ fit into the Clean Architecture layers, but no login UI, session
+> management, or route guards are implemented. Adding a full auth domain is a natural next step when
+> extending this project for production use.
 
 ## 🚀 Deployment
 
@@ -390,16 +392,6 @@ NEXT_PUBLIC_API_URL=http://localhost:3001
 
 **Note**: Configuration is managed through the IoC container system in
 `src/infrastructure/container/`.
-
-### Docker Support 🚧
-
-**Status**: Planned for future implementation
-
-Docker configuration will include:
-
-- Multi-stage builds for optimization
-- Development and production environments
-- Container orchestration support
 
 ### Deployment Targets
 
